@@ -87,3 +87,214 @@ sw_df =
     run_time = runtime_vec
   )
 ```
+
+## APIs
+
+``` r
+nyc_water = 
+  GET("https://data.cityofnewyork.us/resource/ia2d-e54m.csv") %>% 
+  content("parsed")
+```
+
+    ## Rows: 43 Columns: 4
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## dbl (4): year, new_york_city_population, nyc_consumption_million_gallons_per...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+nyc_water = 
+  GET("https://data.cityofnewyork.us/resource/ia2d-e54m.json") %>% 
+  content("text")%>%
+  jsonlite::fromJSON()
+```
+
+``` r
+brfss_sdf= 
+  GET("https://chronicdata.cdc.gov/resource/acme-vg9e.csv", query = list("$limit" = 5000)) %>% 
+  content("parsed")
+```
+
+    ## Rows: 5000 Columns: 23
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (16): locationabbr, locationdesc, class, topic, question, response, data...
+    ## dbl  (6): year, sample_size, data_value, confidence_limit_low, confidence_li...
+    ## lgl  (1): locationid
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+pokemon
+
+``` r
+poke = 
+  GET("http://pokeapi.co/api/v2/pokemon/1") %>%
+  content()
+
+names(poke)
+```
+
+    ##  [1] "abilities"                "base_experience"         
+    ##  [3] "forms"                    "game_indices"            
+    ##  [5] "height"                   "held_items"              
+    ##  [7] "id"                       "is_default"              
+    ##  [9] "location_area_encounters" "moves"                   
+    ## [11] "name"                     "order"                   
+    ## [13] "past_types"               "species"                 
+    ## [15] "sprites"                  "stats"                   
+    ## [17] "types"                    "weight"
+
+``` r
+poke[["weight"]]
+```
+
+    ## [1] 69
+
+## string
+
+``` r
+library(rvest)
+library(p8105.datasets)
+```
+
+``` r
+#detect whether this word or character exists
+
+string_vec = c("my", "name", "is", "jeff")
+
+str_detect(string_vec, "jeff")
+```
+
+    ## [1] FALSE FALSE FALSE  TRUE
+
+``` r
+str_detect(string_vec, "e")
+```
+
+    ## [1] FALSE  TRUE FALSE  TRUE
+
+``` r
+# sensitive to capital
+str_detect(string_vec, "J")
+```
+
+    ## [1] FALSE FALSE FALSE FALSE
+
+``` r
+#change the capital
+str_replace(string_vec,"jeff","Jeff")
+```
+
+    ## [1] "my"   "name" "is"   "Jeff"
+
+``` r
+string_vec = c(
+  "i think we all rule for participating",
+  "i think i have been caught",
+  "i think this will be quite fun actually",
+  "it will be fun, i think"
+  )
+
+str_detect(string_vec, "^i think") # i think should be start
+```
+
+    ## [1]  TRUE  TRUE  TRUE FALSE
+
+``` r
+str_detect(string_vec, "i think$") # i think should be ended
+```
+
+    ## [1] FALSE FALSE FALSE  TRUE
+
+``` r
+string_vec = c(
+  "Y'all remember Pres. HW Bush?",
+  "I saw a green bush",
+  "BBQ and Bushwalking at Molonglo Gorge",
+  "BUSH -- LIVE IN CONCERT!!"
+  )
+
+str_detect(string_vec,"[Bb]ush") # low or capital B, match both of them
+```
+
+    ## [1]  TRUE  TRUE  TRUE FALSE
+
+``` r
+string_vec = c(
+  '7th inning stretch',
+  '1st half soon to begin. Texas won the toss.',
+  'she is 5 feet 4 inches tall',
+  '3AM - cant sleep :('
+  )
+
+str_detect(string_vec, "^[0-9][a-zA-Z]") #number is followed by a 字母
+```
+
+    ## [1]  TRUE  TRUE FALSE  TRUE
+
+``` r
+string_vec = c(
+  'Its 7:11 in the evening',
+  'want to go to 7-11?',
+  'my flight is AA711',
+  'NetBios: scanning ip 203.167.114.66'
+  )
+
+str_detect(string_vec, "7.11")  #.matches all kinds of special character
+```
+
+    ## [1]  TRUE  TRUE FALSE  TRUE
+
+``` r
+str_detect(string_vec, "7\\.11")  # in this way, . is not a special character anymore
+```
+
+    ## [1] FALSE FALSE FALSE  TRUE
+
+``` r
+string_vec = c(
+  'The CI is [2, 5]',
+  ':-]',
+  ':-[',
+  'I found the answer on pages [6-7]'
+  )
+
+str_detect(string_vec, "\\[")
+```
+
+    ## [1]  TRUE FALSE  TRUE  TRUE
+
+## factor
+
+``` r
+vec_sex = factor(c("male", "male", "female", "female"))
+vec_sex
+```
+
+    ## [1] male   male   female female
+    ## Levels: female male
+
+``` r
+as.numeric(vec_sex)
+```
+
+    ## [1] 2 2 1 1
+
+relevel…
+
+``` r
+vec_sex = fct_relevel(vec_sex,"male") # change the first level i want
+vec_sex
+```
+
+    ## [1] male   male   female female
+    ## Levels: male female
+
+``` r
+as.numeric(vec_sex)
+```
+
+    ## [1] 1 1 2 2

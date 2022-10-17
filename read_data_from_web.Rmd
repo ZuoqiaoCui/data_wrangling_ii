@@ -39,6 +39,139 @@ sw_df =
   )
 ```
 
+## APIs
+
+```{r}
+nyc_water = 
+  GET("https://data.cityofnewyork.us/resource/ia2d-e54m.csv") %>% 
+  content("parsed")
+```
+```{r}
+nyc_water = 
+  GET("https://data.cityofnewyork.us/resource/ia2d-e54m.json") %>% 
+  content("text")%>%
+  jsonlite::fromJSON()
+```
+```{r}
+brfss_sdf= 
+  GET("https://chronicdata.cdc.gov/resource/acme-vg9e.csv", query = list("$limit" = 5000)) %>% 
+  content("parsed")
+```
+
+pokemon
+```{r}
+poke = 
+  GET("http://pokeapi.co/api/v2/pokemon/1") %>%
+  content()
+
+names(poke)
+poke[["weight"]]
+```
+
+## string
+```{r}
+library(rvest)
+library(p8105.datasets)
+```
+
+
+```{r}
+#detect whether this word or character exists
+
+string_vec = c("my", "name", "is", "jeff")
+
+str_detect(string_vec, "jeff")
+
+str_detect(string_vec, "e")
+
+# sensitive to capital
+str_detect(string_vec, "J")
+#change the capital
+str_replace(string_vec,"jeff","Jeff")
+```
+
+```{r}
+string_vec = c(
+  "i think we all rule for participating",
+  "i think i have been caught",
+  "i think this will be quite fun actually",
+  "it will be fun, i think"
+  )
+
+str_detect(string_vec, "^i think") # i think should be start
+str_detect(string_vec, "i think$") # i think should be ended
+```
+
+```{r}
+string_vec = c(
+  "Y'all remember Pres. HW Bush?",
+  "I saw a green bush",
+  "BBQ and Bushwalking at Molonglo Gorge",
+  "BUSH -- LIVE IN CONCERT!!"
+  )
+
+str_detect(string_vec,"[Bb]ush") # low or capital B, match both of them
+```
+
+```{r}
+string_vec = c(
+  '7th inning stretch',
+  '1st half soon to begin. Texas won the toss.',
+  'she is 5 feet 4 inches tall',
+  '3AM - cant sleep :('
+  )
+
+str_detect(string_vec, "^[0-9][a-zA-Z]") #number is followed by a 字母
+```
+
+```{r}
+string_vec = c(
+  'Its 7:11 in the evening',
+  'want to go to 7-11?',
+  'my flight is AA711',
+  'NetBios: scanning ip 203.167.114.66'
+  )
+
+str_detect(string_vec, "7.11")  #.matches all kinds of special character
+str_detect(string_vec, "7\\.11")  # in this way, . is not a special character anymore
+```
+
+```{r}
+string_vec = c(
+  'The CI is [2, 5]',
+  ':-]',
+  ':-[',
+  'I found the answer on pages [6-7]'
+  )
+
+str_detect(string_vec, "\\[")
+
+```
+
+
+## factor
+
+```{r}
+vec_sex = factor(c("male", "male", "female", "female"))
+vec_sex
+as.numeric(vec_sex)
+```
+
+relevel...
+
+```{r}
+vec_sex = fct_relevel(vec_sex,"male") # change the first level i want
+vec_sex
+as.numeric(vec_sex)
+```
+
+
+
+
+
+
+
+
 
 
 
