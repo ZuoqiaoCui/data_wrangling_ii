@@ -326,3 +326,147 @@ data_marj =
     percent = as.numeric(percent)) %>%
   filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
 ```
+
+## NSDUN===factor
+
+``` r
+data_marj %>%
+  filter(age == "12-17") %>% 
+  mutate(State = fct_reorder(State, percent)) %>% #reorder according to percent
+  ggplot(aes(x = State, y = percent, color = year)) + 
+    geom_point() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+![](read_data_from_web_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+## weather data
+
+``` r
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+    ## Registered S3 method overwritten by 'hoardr':
+    ##   method           from
+    ##   print.cache_info httr
+
+    ## using cached file: ~/Library/Caches/R/noaa_ghcnd/USW00094728.dly
+
+    ## date created (size, mb): 2022-09-28 15:06:12 (8.401)
+
+    ## file min/max dates: 1869-01-01 / 2022-09-30
+
+    ## using cached file: ~/Library/Caches/R/noaa_ghcnd/USC00519397.dly
+
+    ## date created (size, mb): 2022-09-28 15:06:15 (1.699)
+
+    ## file min/max dates: 1965-01-01 / 2020-03-31
+
+    ## using cached file: ~/Library/Caches/R/noaa_ghcnd/USS0023B17S.dly
+
+    ## date created (size, mb): 2022-09-28 15:06:17 (0.95)
+
+    ## file min/max dates: 1999-09-01 / 2022-09-30
+
+``` r
+weather_df %>% 
+  mutate(
+    name = fct_reorder(name,tmax)
+  ) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_ydensity).
+
+![](read_data_from_web_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+weather_df %>% 
+  lm(tmax ~ name,data = .)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = tmax ~ name, data = .)
+    ## 
+    ## Coefficients:
+    ##      (Intercept)    nameWaikiki_HA  nameWaterhole_WA  
+    ##           17.366            12.291            -9.884
+
+``` r
+data("rest_inspec")
+rest_inspec %>% 
+  group_by(boro, grade) %>% 
+  summarize(n = n()) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+    ## `summarise()` has grouped output by 'boro'. You can override using the
+    ## `.groups` argument.
+
+    ## # A tibble: 6 × 8
+    ## # Groups:   boro [6]
+    ##   boro              A     B     C `Not Yet Graded`     P     Z  `NA`
+    ##   <chr>         <int> <int> <int>            <int> <int> <int> <int>
+    ## 1 BRONX         13688  2801   701              200   163   351 16833
+    ## 2 BROOKLYN      37449  6651  1684              702   416   977 51930
+    ## 3 MANHATTAN     61608 10532  2689              765   508  1237 80615
+    ## 4 Missing           4    NA    NA               NA    NA    NA    13
+    ## 5 QUEENS        35952  6492  1593              604   331   913 45816
+    ## 6 STATEN ISLAND  5215   933   207               85    47   149  6730
+
+``` r
+rest_inspec =
+  rest_inspec %>%
+  filter(grade %in% c("A", "B", "C"), boro != "Missing") %>% 
+  mutate(boro = str_to_title(boro))
+```
+
+``` r
+rest_inspec %>% 
+  filter(str_detect(dba, "Pizza")) %>% 
+  group_by(boro, grade) %>% 
+  summarize(n = n()) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+    ## `summarise()` has grouped output by 'boro'. You can override using the
+    ## `.groups` argument.
+
+    ## # A tibble: 5 × 3
+    ## # Groups:   boro [5]
+    ##   boro              A     B
+    ##   <chr>         <int> <int>
+    ## 1 Bronx             9     3
+    ## 2 Brooklyn          6    NA
+    ## 3 Manhattan        26     8
+    ## 4 Queens           17    NA
+    ## 5 Staten Island     5    NA
+
+``` r
+rest_inspec %>% 
+  filter(str_detect(dba, "[Pp][Ii][Zz][Zz][Aa]")) %>%
+  mutate(
+    boro = fct_infreq(boro) #most frequency
+  ) %>% 
+  ggplot(aes(x = boro)) + 
+  geom_bar() 
+```
+
+![](read_data_from_web_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->

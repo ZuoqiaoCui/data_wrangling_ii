@@ -3,6 +3,8 @@ title: "reading_data_from_the_web"
 author: "Zuoqiao Cui"
 date: "2022-10-11"
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r}
 library(tidyverse)
@@ -192,6 +194,88 @@ data_marj =
     percent = as.numeric(percent)) %>%
   filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
 ```
+
+## NSDUN===factor
+
+```{r}
+data_marj %>%
+  filter(age == "12-17") %>% 
+  mutate(State = fct_reorder(State, percent)) %>% #reorder according to percent
+  ggplot(aes(x = State, y = percent, color = year)) + 
+    geom_point() + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+## weather data
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+```{r}
+weather_df %>% 
+  mutate(
+    name = fct_reorder(name,tmax)
+  ) %>% 
+  ggplot(aes(x = name, y = tmax)) + 
+  geom_violin(aes(fill = name), color = "blue", alpha = .5) + 
+  theme(legend.position = "bottom")
+```
+
+```{r}
+weather_df %>% 
+  lm(tmax ~ name,data = .)
+```
+
+```{r}
+data("rest_inspec")
+rest_inspec %>% 
+  group_by(boro, grade) %>% 
+  summarize(n = n()) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+```{r}
+rest_inspec =
+  rest_inspec %>%
+  filter(grade %in% c("A", "B", "C"), boro != "Missing") %>% 
+  mutate(boro = str_to_title(boro))
+```
+```{r}
+rest_inspec %>% 
+  filter(str_detect(dba, "Pizza")) %>% 
+  group_by(boro, grade) %>% 
+  summarize(n = n()) %>% 
+  pivot_wider(names_from = grade, values_from = n)
+```
+
+```{r}
+rest_inspec %>% 
+  filter(str_detect(dba, "[Pp][Ii][Zz][Zz][Aa]")) %>%
+  mutate(
+    boro = fct_infreq(boro) #most frequency
+  ) %>% 
+  ggplot(aes(x = boro)) + 
+  geom_bar() 
+```
+
+
+
+
+
 
 
 
